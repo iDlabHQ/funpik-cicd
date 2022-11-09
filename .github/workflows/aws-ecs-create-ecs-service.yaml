@@ -21,7 +21,7 @@ on:
       service_count:
         description: Service count
         required: true
-        type: integer
+        type: string
 
       task_def_name:
         description: Task definition name
