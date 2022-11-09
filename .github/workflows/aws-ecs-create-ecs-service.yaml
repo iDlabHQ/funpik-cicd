@@ -70,7 +70,7 @@ jobs:
           cat ./tmp.txt;
           echo "TG=$(cat ./tmp.txt)" >> $GITHUB_ENV;
 
-      - name:
+      - name: Create service
         run: |
           aws ecs create-service \
             --region ap-northeast-2 \
