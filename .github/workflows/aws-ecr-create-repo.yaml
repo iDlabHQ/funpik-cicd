@@ -16,12 +16,6 @@ on:
         required: true
         type: string
 
-    secrets:
-      AWS_ACCESS_KEY_ID:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
-
 jobs:
   create:
     runs-on: ubuntu-latest
@@ -32,6 +26,8 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::778942390430:role/github-actions-cicd-role
           aws-region: ap-northeast-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Configure suffix
         if: ${{ inputs.environment == 'development' }}
