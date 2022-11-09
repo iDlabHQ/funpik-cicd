@@ -81,7 +81,7 @@ jobs:
             --load-balancer-arn ${{ env.ELB }} \
             --portocol HTTPS \
             --port ${{ inputs.port }} \
-            --certificates "CertificateArn={{ env.CERT }}" \
-            --default-actions "Type=forward,TargetGroupArn={{ env.TG }}"
+            --certificates "CertificateArn=${{ env.CERT }}" \
+            --default-actions "Type=forward,TargetGroupArn=${{ env.TG }}"
 
   
