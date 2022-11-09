@@ -3,7 +3,8 @@ name: AWS ELB create target group
 on:
   workflow_call:
     inputs:
-      description: Environment
+      envrionment:
+        description: Environment
         required: true
         type: string
 
