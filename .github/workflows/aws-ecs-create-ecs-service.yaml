@@ -74,10 +74,10 @@ jobs:
         run: |
           aws resourcegroupstaggingapi get-resources \
             --tag-filters Key=Name,Values=${{ inputs.service_name }}${{ env.SUFFIX }}-svg \
-            --region ap-northeast-2 | jq -r '.ResourceTagMappingList | .[] | .ResourceARN'  >> ./tmp.txt;
+            --region ap-northeast-2 | jq -r '.ResourceTagMappingList | .[] | .ResourceARN'  >> ./tmp2.txt;
 
-          cat ./tmp.txt;
-          echo "SVC=$(cat ./tmp.txt)" >> $GITHUB_ENV;
+          cat ./tmp2.txt;
+          echo "SVC=$(cat ./tmp2.txt)" >> $GITHUB_ENV;
 
       - name: Create service
         if: ${{ inputs.SVC == '' }}
