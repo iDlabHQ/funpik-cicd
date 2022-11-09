@@ -25,6 +25,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: arn:aws:iam::778942390430:role/github-actions-cicd-role
+          role-session-name: cicd
           aws-region: ap-northeast-2
 
       - name: Configure suffix
