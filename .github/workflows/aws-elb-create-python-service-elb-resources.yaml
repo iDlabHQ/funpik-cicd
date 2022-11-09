@@ -63,7 +63,7 @@ jobs:
             --region ap-northeast-2 \
             --health-check-protocol HTTP \
             --health-check-path "/v1/health" \
-            --tags Key=Name,Value=${{ inputs.repo_name }}${{ env.SUFFIX }}-tg
+            --tags key=Name,value=${{ inputs.repo_name }}${{ env.SUFFIX }}-tg
 
       - name: Get target group
         run: |
