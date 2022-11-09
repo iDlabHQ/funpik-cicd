@@ -19,7 +19,7 @@ on:
         type: string
 
 jobs:
-  create:
+  setup:
     runs-on: ubuntu-latest
 
     permissions:
