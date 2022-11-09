@@ -23,8 +23,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      package: write
-      content: read
+      packages: write
+      contents: read
       id-token: write
 
     steps:
