@@ -63,10 +63,7 @@ jobs:
             --health-check-protocol HTTP \
             --health-check-path "/v1/health");
 
-          "TG=$(cat $TMP | jq -r '.TargetGroups | .[] | .TargetGroupArn')" >> $GITHUB_ENV;
-
-      - name: Configure target group
-        run: arn:aws:elasticloadbalancing:ap-northeast-2:778942390430:targetgroup/GENERIC-SERVICE/c044f3319cb9d604
+          echo "TG=$(cat $TMP | jq -r '.TargetGroups | .[] | .TargetGroupArn')" >> $GITHUB_ENV;
 
       - name: Create elb listener
         run: |
