@@ -76,7 +76,7 @@ jobs:
             --region ap-northeast-2 \
             --cluster ${{ env.CLUSTER }} \
             --service-name ${{ inputs.service_name }}${{ env.SUFFIX }} \
-            --task-definition ${{ inputs.task_def_name }} \
+            --task-definition ${{ inputs.task_def_name }}${{ env.SUFFIX }} \
             --desired-count ${{ inputs.service_count }} \
             --capacity-provider-strategy "capacityProvider=FARGATE,weight=1,base=0" \
             --network-configuration "awsvpcConfiguration={securityGroups=[${{ env.SG }}],subnets=[${{ env.SUBNETS }}],assignPublicIp=ENABLED}" \
