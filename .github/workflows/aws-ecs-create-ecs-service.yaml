@@ -80,7 +80,7 @@ jobs:
           echo "SVC=$(cat ./tmp2.txt)" >> $GITHUB_ENV;
 
       - name: Create service
-        if: ${{ inputs.SVC == '' }}
+        if: ${{ env.SVC == '' }}
         run: |
           aws ecs create-service \
             --region ap-northeast-2 \
