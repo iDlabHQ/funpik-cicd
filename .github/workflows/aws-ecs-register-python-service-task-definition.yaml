@@ -8,7 +8,7 @@ on:
         required: true
         type: string
 
-      service_name:
+      task_def_name:
         description: Service name
         required: true
         type: string
@@ -51,7 +51,7 @@ jobs:
         run: |
           aws ecs register-task-definition \
             --region ap-northeast-2 \
-            --family ${{ inputs.service_name }}${{ env.SUFFIX }} \
+            --family ${{ inputs.task_def_name }}${{ env.SUFFIX }} \
             --task-role-arn "arn:aws:iam::778942390430:role/ecs-tasks-role" \
             --execution-role-arn "arn:aws:iam::778942390430:role/ecs-tasks-execution-role" \
             --network-mode "awsvpc" \

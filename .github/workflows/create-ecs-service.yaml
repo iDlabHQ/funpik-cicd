@@ -1,0 +1,68 @@
+name: AWS ECS update service
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Environment
+        required: true
+        type: string
+
+      service_name:
+        description: Service name
+        required: true
+        type: string
+
+      service_count:
+        description: Service count
+        required: true
+        type: integer
+
+      task_def_name:
+        description: Task definition name
+        required: true
+        type: string
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::778942390430:role/github-actions-cicd-role
+          role-session-name: cicd
+          aws-region: ap-northeast-2
+
+      - name: Configure suffix
+        if: ${{ inputs.environment == 'development' }}
+        run: echo "SUFFIX=-dev" >> $GITHUB_ENV;
+
+      - name: Configure cluster
+        if: ${{ inputs.environment == 'development' }}
+        run: echo "CLUSTER=funpik-development-cluster" >> $GITHUB_ENV;
+
+      - name: Configure subnets
+        if: ${{ inputs.environment == 'development' }}
+        run: echo "SUBNETS=subnet-0afbeac3ff6e6f850,subnet-0287d8045719d8f0c" >> $GITHUB_ENV;
+
+      - name: Configure security group
+        if: ${{ inputs.environment == 'development' }}
+        run: echo "SG=sg-0063f5d32aba32ec7" >> $GITHUB_ENV;
+
+      - name:
+        run: |
+          aws ecs create-service \
+            --region ap-northeast-2 \
+            --cluster ${{ env.CLUSTER }} \
+            --service-name ${{ inputs.service_name }}${{ env.SUFFIX }} \
+            --desired-count ${{ inputs.service_count }} \
+            --capacity-provider-strategy "capacityProvider=FARGATE,weight=1,base=0" \
+            --network-configuration "awsvpcConfiguration={securityGroups=[${{ env.SG }}],subnets=[${{ env.SUBNETS }}],assignPublicIp=ENABLED}" \
+            --cli-input-yaml file://sys/app/service.yaml;
