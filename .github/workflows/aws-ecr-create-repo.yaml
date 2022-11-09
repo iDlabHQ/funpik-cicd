@@ -6,7 +6,6 @@ env:
 on:
   workflow_call:
     inputs:
-
       environment:
         description: Environment
         required: true
@@ -26,7 +25,6 @@ on:
 jobs:
   create:
     runs-on: ubuntu-latest
-    env: 
     steps:
 
       - name: Configure AWS Credentials
