@@ -79,7 +79,7 @@ jobs:
           aws elbv2 create-listener \
             --region ap-northeast-2 \
             --load-balancer-arn ${{ env.ELB }} \
-            --portocol HTTPS \
+            --protocol HTTPS \
             --port ${{ inputs.port }} \
             --certificates "CertificateArn=${{ env.CERT }}" \
             --default-actions "Type=forward,TargetGroupArn=${{ env.TG }}"
