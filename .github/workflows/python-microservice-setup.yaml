@@ -33,6 +33,7 @@ on:
         required: true
         type: string
 
+
 jobs:
   ecr_repo_setup:
     uses: iDlabHQ/funpik-cicd/.github/workflows/aws-ecr-create-repo.yaml@main
