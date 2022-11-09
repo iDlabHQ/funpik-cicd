@@ -56,7 +56,7 @@ jobs:
           aws elbv2 create-target-group \
             --name ${{ inputs.repo_name }}${{ env.SUFFIX }} \
             --protocol HTTP \
-            --protocol-version HTTP2 \
+            --protocol-version HTTP1 \
             --port 8000 \
             --target-type ip \
             --vpc-id ${{ env.VPCID }} \
