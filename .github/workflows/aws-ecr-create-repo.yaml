@@ -24,6 +24,7 @@ on:
 
 jobs:
   create:
+    runs-on: ubuntu-latest
     steps:
 
       - name: Configure AWS Credentials
