@@ -57,4 +57,5 @@ jobs:
             --network-mode "awsvpc" \
             --cpu "${{ env.CPU }}" \
             --memory "${{ env.MEMORY }}" \
-            --container-definitions "[{\"name\":\"main\",\"image\":\"778942390430.dkr.ecr.ap-northeast-2.amazonaws.com\/${{ inputs.repo_name }}\",\"portMappings\":[{\"containerPort\":8000}]}]"
+            --container-definitions "[{\"name\":\"main\",\"image\":\"778942390430.dkr.ecr.ap-northeast-2.amazonaws.com\/${{ inputs.repo_name }}\",\"portMappings\":[{\"containerPort\":8000}]}]" \
+            --runtime-platform cpuArchitecture=ARM64,operatingSystemFamily=LINUX
