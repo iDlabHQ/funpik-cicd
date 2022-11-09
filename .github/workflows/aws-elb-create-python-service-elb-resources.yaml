@@ -53,7 +53,7 @@ jobs:
       
       - name: Create target group
         run: |
-          TMP=$(aws elbv2 create-target-group \
+          aws elbv2 create-target-group \
             --name ${{ inputs.repo_name }}${{ env.SUFFIX }} \
             --protocol HTTP \
             --protocol-version HTTP2 \
@@ -62,9 +62,15 @@ jobs:
             --vpc-id ${{ env.VPCID }} \
             --region ap-northeast-2 \
             --health-check-protocol HTTP \
-            --health-check-path "/v1/health");
+            --health-check-path "/v1/health" \
+            --tags Key=Name,Value=${{ inputs.repo_name }}${{ env.SUFFIX }}-tg
 
-          echo "TG=$(cat $TMP | jq -r '.TargetGroups | .[] | .TargetGroupArn')" >> $GITHUB_ENV;
+      - name: Get target group
+        run: |
+          TMP=$(aws resourcegroupstaggingapi get-resources \
+            --tag-filters Key=Name,Values=generic-service-dev \
+            --region ap-northeast-2);
+          echo "TG=$(echo $TMP jq -r '.ResourceTagMappingList | .[] | .ResourceARN')" >> $GITHUB_ENV;
 
       - name: Create elb listener
         run: |
