@@ -1,0 +1,81 @@
+name: AWS ELB create target group
+
+on:
+  workflow_call:
+    inputs:
+      description: Environment
+        required: true
+        type: string
+
+      repo_name:
+        description: Repository name
+        required: true
+        type: string
+
+      port:
+        description: Service port
+        required: true
+        type: string
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+
+    permissions:
+      package: write
+      content: read
+      id-token: write
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::778942390430:role/github-actions-cicd-role
+          role-session-name: cicd
+          aws-region: ap-northeast-2
+
+      - name: Configure suffix
+        if: ${{ inputs.environment == 'development' }}
+        run: echo "SUFFIX=-dev" >> $GITHUB_ENV;
+
+      - name: Configure vpc id
+        if: ${{ inputs.environment == 'development' }}
+        run: echo "VPCID=vpc-09847396b8d639571" >> $GITHUB_ENV;
+
+      - name: Configure loadbalancer
+        if: ${{ inputs.environment == 'development' }}
+        run: echo "ELB=arn:aws:elasticloadbalancing:ap-northeast-2:778942390430:loadbalancer/app/funpik-development-external-lb/fb59578db261a487" >> $GITHUB_ENV;
+
+      - name: Configure certificate
+        if: ${{ inputs.environment == 'development' }}
+        run: echo "CERT=arn:aws:acm:ap-northeast-2:778942390430:certificate/9afc89b8-961a-4368-afe7-03be7aff7249" >> $GITHUB_ENV;
+      
+      - name: Create target group
+        run: |
+          TMP=$(aws elbv2 create-target-group \
+            --name {{ inputs.repo_name }}${{ env.SUFFIX }} \
+            --protocol HTTP \
+            --protocol-version HTTP2 \
+            --port 8000 \
+            --target-type ip \
+            --vpc-id $VPCID \
+            --region ap-northeast-2 \
+            --health-check-protocol HTTP \
+            --health-check-path "/v1/health");
+
+          "TG=$(cat $TMP | jq -r '.TargetGroups | .[] | .TargetGroupArn')" >> $GITHUB_ENV;
+
+      - name: Configure target group
+        run: arn:aws:elasticloadbalancing:ap-northeast-2:778942390430:targetgroup/GENERIC-SERVICE/c044f3319cb9d604
+
+      - name: Create elb listener
+        run: |
+          aws elbv2 create-listener \
+            --region ap-northeast-2 \
+            --load-balancer-arn ${{ env.ELB }} \
+            --portocol HTTPS \
+            --port {{ inputs.port }} \
+            --certificates "CertificateArn={{ env.CERT }}" \
+            --default-actions "Type=forward,TargetGroupArn={{ env.TG }}"
+
+  
