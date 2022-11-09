@@ -39,6 +39,14 @@ jobs:
         if: ${{ inputs.environment == 'development' }}
         run: echo "SUFFIX=-dev" >> $GITHUB_ENV;
 
+      - name: Configure cpu
+        if: ${{ inputs.environment == 'development' }}
+        run: echo "CPU=0.25 vCPU" >> $GITHUB_ENV;
+
+      - name: Configure memory
+        if: ${{ inputs.environment == 'development' }}
+        run: echo "MEMORY=0.5 GB" >> $GITHUB_ENV;
+
       - name: Create task definition
         run: |
           aws ecs register-task-definition \
@@ -47,4 +55,6 @@ jobs:
             --task-role-arn "arn:aws:iam::778942390430:role/ecs-tasks-role" \
             --execution-role-arn "arn:aws:iam::778942390430:role/ecs-tasks-execution-role" \
             --network-mode "awsvpc" \
+            --cpu "${{ env.CPU }}" \
+            --memory "${{ env.MEMORY }}" \
             --container-definitions "[{\"name\":\"main\",\"image\":\"778942390430.dkr.ecr.ap-northeast-2.amazonaws.com\/${{ inputs.repo_name }}\",\"portMappings\":[{\"containerPort\":8000}]}]"
