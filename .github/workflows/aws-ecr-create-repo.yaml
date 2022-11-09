@@ -24,7 +24,7 @@ on:
         required: true
 
 jobs:
-  dev-create:
+  create:
     runs-on: ubuntu-latest
     env: 
     steps:
