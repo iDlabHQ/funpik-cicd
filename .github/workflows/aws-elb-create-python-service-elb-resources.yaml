@@ -54,7 +54,7 @@ jobs:
       - name: Create target group
         run: |
           TMP=$(aws elbv2 create-target-group \
-            --name generic-service-dev \
+            --name ${{ inputs.repo_name }}${{ env.SUFFIX }} \
             --protocol HTTP \
             --protocol-version HTTP2 \
             --port 8000 \
