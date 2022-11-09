@@ -24,7 +24,6 @@ on:
 
 jobs:
   create:
-    runs-on: ubuntu-latest
     steps:
 
       - name: Configure AWS Credentials
@@ -37,6 +36,7 @@ jobs:
         if: ${{ inputs.environment == 'development' }}
         env:
           SUFFIX: -dev
+        run: echo $SUFFIX
 
       - name: Create ECR repository
         run: |
