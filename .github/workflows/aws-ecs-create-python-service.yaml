@@ -1,0 +1,53 @@
+name: AWS ECS create service
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Environment
+        required: true
+        type: string
+
+      service_name:
+        description: Service name
+        required: true
+        type: string
+
+      task_definition_file_path:
+        description: Task definition file path
+
+      repo_name:
+        description: Repository name
+        required: true
+        type: string
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::778942390430:role/github-actions-cicd-role
+          role-session-name: cicd
+          aws-region: ap-northeast-2
+
+      - name: Configure suffix
+        if: ${{ inputs.environment == 'development' }}
+        run: echo "SUFFIX=-dev" >> $GITHUB_ENV;
+
+      - name: Create task definition
+        run: |
+          aws ecs register-task-definition \
+            --region ap-northeast-2 \
+            --family ${{ inputs.service_name }}${{ env.SUFFIX }} \
+            --task-role-arn "arn:aws:iam::778942390430:role/ecs-tasks-role" \
+            --execution-role-arn "arn:aws:iam::778942390430:role/ecs-tasks-execution-role" \
+            --network-mode "awsvpc" \
+            --container-definitions "[{\"name\":\"main\",\"image\":\"778942390430.dkr.ecr.ap-northeast-2.amazonaws.com\/${{ inputs.repo_name }}\",\"portMappings\":[{\"containerPort\":8000}]}]"
