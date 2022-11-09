@@ -54,12 +54,12 @@ jobs:
       - name: Create target group
         run: |
           TMP=$(aws elbv2 create-target-group \
-            --name ${{ inputs.repo_name }}${{ env.SUFFIX }} \
+            --name generic-service-dev \
             --protocol HTTP \
             --protocol-version HTTP2 \
             --port 8000 \
             --target-type ip \
-            --vpc-id $VPCID \
+            --vpc-id ${{ env.VPCID }} \
             --region ap-northeast-2 \
             --health-check-protocol HTTP \
             --health-check-path "/v1/health");
