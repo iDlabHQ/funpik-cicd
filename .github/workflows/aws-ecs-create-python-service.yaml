@@ -13,9 +13,6 @@ on:
         required: true
         type: string
 
-      task_definition_file_path:
-        description: Task definition file path
-
       repo_name:
         description: Repository name
         required: true
