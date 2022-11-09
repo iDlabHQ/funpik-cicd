@@ -91,4 +91,4 @@ jobs:
             --capacity-provider-strategy "capacityProvider=FARGATE,weight=1,base=0" \
             --network-configuration "awsvpcConfiguration={securityGroups=[${{ env.SG }}],subnets=[${{ env.SUBNETS }}],assignPublicIp=ENABLED}" \
             --load-balancers "targetGroupArn=${{ env.TG }},containerName=main,containerPort=8000" \
-            --tags Key=Name,Value=${{ inputs.service_name }}${{ env.SUFFIX }}-svc;
+            --tags Key=Name,value=${{ inputs.service_name }}${{ env.SUFFIX }}-svc;
