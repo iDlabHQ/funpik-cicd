@@ -73,7 +73,7 @@ jobs:
       - name: Get service
         run: |
           aws resourcegroupstaggingapi get-resources \
-            --tag-filters Key=Name,Values=${{ inputs.service_name }}${{ env.SUFFIX }}-svg \
+            --tag-filters Key=Name,Values=${{ inputs.service_name }}${{ env.SUFFIX }}-svc \
             --region ap-northeast-2 | jq -r '.ResourceTagMappingList | .[] | .ResourceARN'  >> ./tmp2.txt;
 
           cat ./tmp2.txt;
