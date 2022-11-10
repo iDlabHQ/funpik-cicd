@@ -67,7 +67,7 @@ jobs:
         run: |
           echo "ELB=$(\
           aws resourcegroupstaggingapi get-resources \
-            --tag-filters Key=Name,Values={{ env.ELBNAME }} \
+            --tag-filters Key=Name,Values=${{ env.ELBNAME }} \
             --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
           )" >> $GITHUB_ENV;
 
