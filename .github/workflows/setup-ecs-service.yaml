@@ -8,6 +8,12 @@ on:
         required: true
         type: string
 
+      region:
+        description: AWS region
+        required: true
+        type: string
+        default: ap-northeast-2
+      
       repo_name: 
         description: Repository name
         required: true
@@ -29,6 +35,7 @@ on:
         type: string
 
 jobs:
+
   setup:
     runs-on: ubuntu-latest
 
@@ -43,47 +50,35 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::778942390430:role/github-actions-cicd-role
           role-session-name: cicd
-          aws-region: ap-northeast-2
+          aws-region: ${{ inputs.region }}
 
-      - name: Configure suffix
+      - name: Configure dev
         if: ${{ inputs.environment == 'development' }}
-        run: echo "SUFFIX=-dev" >> $GITHUB_ENV;
-
-      - name: Configure cluster
-        if: ${{ inputs.environment == 'development' }}
-        run: echo "CLUSTER=funpik-development-cluster" >> $GITHUB_ENV;
-
-      - name: Configure subnets
-        if: ${{ inputs.environment == 'development' }}
-        run: echo "SUBNETS=subnet-0afbeac3ff6e6f850,subnet-0287d8045719d8f0c" >> $GITHUB_ENV;
-
-      - name: Configure security group
-        if: ${{ inputs.environment == 'development' }}
-        run: echo "SG=sg-0063f5d32aba32ec7" >> $GITHUB_ENV;
+        run: |
+          echo "SUFFIX=-dev" >> $GITHUB_ENV;
+          echo "CLUSTER=funpik-development-cluster" >> $GITHUB_ENV;
+          echo "SUBNETS=subnet-0afbeac3ff6e6f850,subnet-0287d8045719d8f0c" >> $GITHUB_ENV;
+          echo "SG=sg-0063f5d32aba32ec7" >> $GITHUB_ENV;
 
       - name: Get target group
-        run: |
+        run: echo "TG=$(\
           aws resourcegroupstaggingapi get-resources \
-            --tag-filters Key=Name,Values=${{ inputs.repo_name }}${{ env.SUFFIX }}-tg \
-            --region ap-northeast-2 | jq -r '.ResourceTagMappingList | .[] | .ResourceARN'  >> ./tmp.txt;
-
-          cat ./tmp.txt;
-          echo "TG=$(cat ./tmp.txt)" >> $GITHUB_ENV;
+            --tag-filters Key=Name,Values=${{ inputs.elb_target_group_name }}${{ env.SUFFIX }}-tg \
+            --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
+        )" >> $GITHUB_ENV;
 
       - name: Get service
-        run: |
+        run: echo "SVC=$(\
           aws resourcegroupstaggingapi get-resources \
             --tag-filters Key=Name,Values=${{ inputs.service_name }}${{ env.SUFFIX }}-svc \
-            --region ap-northeast-2 | jq -r '.ResourceTagMappingList | .[] | .ResourceARN'  >> ./tmp2.txt;
-
-          cat ./tmp2.txt;
-          echo "SVC=$(cat ./tmp2.txt)" >> $GITHUB_ENV;
+            --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
+        )" >> $GITHUB_ENV;
 
       - name: Create service
         if: ${{ env.SVC == '' }}
         run: |
           aws ecs create-service \
-            --region ap-northeast-2 \
+            --region ${{ inputs.region }} \
             --cluster ${{ env.CLUSTER }} \
             --service-name ${{ inputs.service_name }}${{ env.SUFFIX }} \
             --task-definition ${{ inputs.task_def_name }}${{ env.SUFFIX }} \

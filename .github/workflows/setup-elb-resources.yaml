@@ -1,0 +1,111 @@
+name: Setup ELB resources
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Environment
+        required: true
+        type: string
+        default: development
+
+      region:
+        description: AWS region
+        required: true
+        type: string
+        default: ap-northeast-2
+
+      elb_target_group_name:
+        description: Service ELB target group name
+        required: true
+        type: string
+
+      elb_listener_port:
+        description: Service ELB port
+        required: true
+        type: string
+
+      elb_target_group_port:
+        description: Service ELB target group port
+        required: true
+        type: string
+        default: 8000
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::778942390430:role/github-actions-cicd-role
+          role-session-name: cicd
+          aws-region: ${{ inputs.region }}
+
+      - name: Configure dev
+        if: ${{ inputs.environment == 'development' }}
+        run: |
+          echo "SUFFIX=-dev" >> $GITHUB_ENV;
+          echo "VPCNAME=funpik-development-vpc";
+          echo "ELBNAME=funpik-development-external-lb";
+          echo "VPCID=vpc-09847396b8d639571" >> $GITHUB_ENV;
+
+      # - name: Configure vpc
+      #   run: echo "VPCID=$(\
+      #     aws resourcegroupstaggingapi get-resources \
+      #       --tag-filters Key=Name,Values=${{ env.VPCNAME }} \
+      #       --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
+      #   )" >> $GITHUB_ENV;
+
+      - name: Configure elb
+        run: echo "ELB=$(\
+          aws resourcegroupstaggingapi get-resources \
+            --tag-filters Key=Name,Values={{ env.ELBNAME }} \
+            --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
+        )" >> $GITHUB_ENV;
+
+      - name: Configure certificate
+        run: echo "CERT=$(\
+          aws resourcegroupstaggingapi get-resources \
+            --tag-filters Key=Name,Values=funpik-cert \
+            --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
+        )" >> $GITHUB_ENV;
+
+      - name: Create target group
+        run: |
+          aws elbv2 create-target-group \
+            --name ${{ inputs.elb_target_group_name }}${{ env.SUFFIX }} \
+            --protocol HTTP \
+            --protocol-version HTTP1 \
+            --port ${{ .elb_target_group_port }} \
+            --target-type ip \
+            --vpc-id ${{ env.VPCID }} \
+            --region ap-northeast-2 \
+            --health-check-protocol HTTP \
+            --health-check-path "/v1/health" \
+            --tags Key=Name,Value=${{ inputs.elb_target_group_name }}${{ env.SUFFIX }}-tg
+
+      - name: Get target group
+        run: echo "TG=$(\
+          aws resourcegroupstaggingapi get-resources \
+            --tag-filters Key=Name,Values=${{ inputs.elb_target_group_name }}${{ env.SUFFIX }}-tg \
+            --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
+        )" >> $GITHUB_ENV;
+
+      - name: Create elb listener
+        run: |
+          aws elbv2 create-listener \
+            --region ap-northeast-2 \
+            --load-balancer-arn ${{ env.ELB }} \
+            --protocol HTTPS \
+            --port ${{ inputs.elb_listener_port }} \
+            --certificates "CertificateArn=${{ env.CERT }}" \
+            --default-actions "Type=forward,TargetGroupArn=${{ env.TG }}"
+
+  

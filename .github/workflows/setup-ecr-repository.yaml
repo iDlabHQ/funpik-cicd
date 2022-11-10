@@ -1,4 +1,4 @@
-name: AWS ECR create repository
+name: Setup ECR repository
 
 on:
   workflow_call:
@@ -7,6 +7,13 @@ on:
         description: Environment
         required: true
         type: string
+        default: development
+
+      region:
+        description: AWS region
+        required: true
+        type: string
+        default: ap-northeast-2
 
       repo_name:
         description: Repository name
@@ -28,9 +35,9 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::778942390430:role/github-actions-cicd-role
           role-session-name: cicd
-          aws-region: ap-northeast-2
+          aws-region: ${{ inputs.region }}
 
-      - name: Configure suffix
+      - name: Configure dev
         if: ${{ inputs.environment == 'development' }}
         run: echo "SUFFIX=-dev" >> $GITHUB_ENV
 
@@ -38,7 +45,7 @@ jobs:
         run: |
           aws ecr describe-repositories \
             --repository-names ${{ inputs.repo_name }}${{ env.SUFFIX }} \
-            --region ap-northeast-2 || \
+            --region ${{ inputs.region }} || \
           aws ecr create-repository \
             --repository-name ${{ inputs.repo_name }}${{ env.SUFFIX }} \
-            --region ap-northeast-2
+            --region ${{ inputs.region }}
