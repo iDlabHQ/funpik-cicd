@@ -52,8 +52,8 @@ jobs:
         if: ${{ inputs.environment == 'development' }}
         run: |
           echo "SUFFIX=-dev" >> $GITHUB_ENV;
-          echo "VPCNAME=funpik-development-vpc";
-          echo "ELBNAME=funpik-development-external-lb";
+          echo "VPCNAME=funpik-development-vpc" >> $GITHUB_ENV;
+          echo "ELBNAME=funpik-development-external-lb" >> $GITHUB_ENV;
           echo "VPCID=vpc-09847396b8d639571" >> $GITHUB_ENV;
 
       # - name: Configure vpc
