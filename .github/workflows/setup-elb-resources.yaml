@@ -85,7 +85,7 @@ jobs:
             --name ${{ inputs.elb_target_group_name }}${{ env.SUFFIX }} \
             --protocol HTTP \
             --protocol-version HTTP1 \
-            --port ${{ .elb_target_group_port }} \
+            --port ${{ inputs.elb_target_group_port }} \
             --target-type ip \
             --vpc-id ${{ env.VPCID }} \
             --region ap-northeast-2 \
