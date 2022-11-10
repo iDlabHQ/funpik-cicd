@@ -71,5 +71,5 @@ jobs:
 
       - name: Create task log group
         run: |
-          aws logs create-log-group --log-group-name "/ecs/${{ inputs.task_def_name }}${{ env.SUFFIX }}";
-          aws logs put-retention-policy --log-group-name "/ecs/${{ inputs.task_def_name }}${{ env.SUFFIX }}" --retention-in-days ${{ env.RETENTION }}
+          aws logs create-log-group --log-group-name "/ecs/${{ inputs.repo_name }}${{ env.SUFFIX }}" || true;
+          aws logs put-retention-policy --log-group-name "/ecs/${{ inputs.repo_name }}${{ env.SUFFIX }}" --retention-in-days ${{ env.RETENTION }}
