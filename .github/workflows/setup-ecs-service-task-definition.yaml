@@ -54,6 +54,7 @@ jobs:
           echo "SUFFIX=-dev" >> $GITHUB_ENV;
           echo "CPU=0.25 vCPU" >> $GITHUB_ENV;
           echo "MEMORY=0.5 GB" >> $GITHUB_ENV;
+          echo "RETENTION=3" >> $GITHUB_ENV;
 
       - name: Create task definition
         run: |
@@ -67,3 +68,8 @@ jobs:
             --memory "${{ env.MEMORY }}" \
             --container-definitions "[{\"name\":\"main\",\"image\":\"778942390430.dkr.ecr.ap-northeast-2.amazonaws.com\/${{ inputs.repo_name }}\",\"portMappings\":[{\"containerPort\":${{ inputs.elb_target_group_port }}}],\"logConfiguration\": {\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"\/ecs\/${{ inputs.task_def_name }}${{ env.SUFFIX }}\",\"awslogs-region\": \"${{ inputs.region }}\",\"awslogs-stream-prefix\":\"ecs\"}}}]" \
             --runtime-platform cpuArchitecture=ARM64,operatingSystemFamily=LINUX;
+
+      - name: Create task log group
+        run: |
+          aws logs create-log-group --log-group-name "/ecs/${{ inputs.task_def_name }}${{ env.SUFFIX }}";
+          aws logs put-retention-policy --log-group-name "/ecs/${{ inputs.task_def_name }}${{ env.SUFFIX }}" --retention-in-days ${{ env.RETENTION }}
