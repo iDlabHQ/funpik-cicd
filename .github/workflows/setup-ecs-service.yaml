@@ -61,18 +61,20 @@ jobs:
           echo "SG=sg-0063f5d32aba32ec7" >> $GITHUB_ENV;
 
       - name: Get target group
-        run: echo "TG=$(\
+        run: |
+          echo "TG=$(\
           aws resourcegroupstaggingapi get-resources \
             --tag-filters Key=Name,Values=${{ inputs.elb_target_group_name }}${{ env.SUFFIX }}-tg \
             --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
-        )" >> $GITHUB_ENV;
+          )" >> $GITHUB_ENV;
 
       - name: Get service
-        run: echo "SVC=$(\
+        run: |
+          echo "SVC=$(\
           aws resourcegroupstaggingapi get-resources \
             --tag-filters Key=Name,Values=${{ inputs.service_name }}${{ env.SUFFIX }}-svc \
             --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
-        )" >> $GITHUB_ENV;
+          )" >> $GITHUB_ENV;
 
       - name: Create service
         if: ${{ env.SVC == '' }}

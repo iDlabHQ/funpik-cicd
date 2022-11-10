@@ -64,18 +64,20 @@ jobs:
       #   )" >> $GITHUB_ENV;
 
       - name: Configure elb
-        run: echo "ELB=$(\
+        run: |
+          echo "ELB=$(\
           aws resourcegroupstaggingapi get-resources \
             --tag-filters Key=Name,Values={{ env.ELBNAME }} \
             --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
-        )" >> $GITHUB_ENV;
+          )" >> $GITHUB_ENV;
 
       - name: Configure certificate
-        run: echo "CERT=$(\
+        run: |
+          echo "CERT=$(\
           aws resourcegroupstaggingapi get-resources \
             --tag-filters Key=Name,Values=funpik-cert \
             --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
-        )" >> $GITHUB_ENV;
+          )" >> $GITHUB_ENV;
 
       - name: Create target group
         run: |
@@ -92,11 +94,12 @@ jobs:
             --tags Key=Name,Value=${{ inputs.elb_target_group_name }}${{ env.SUFFIX }}-tg
 
       - name: Get target group
-        run: echo "TG=$(\
+        run: |
+          echo "TG=$(\
           aws resourcegroupstaggingapi get-resources \
             --tag-filters Key=Name,Values=${{ inputs.elb_target_group_name }}${{ env.SUFFIX }}-tg \
             --region ${{ inputs.region }} | jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
-        )" >> $GITHUB_ENV;
+          )" >> $GITHUB_ENV;
 
       - name: Create elb listener
         run: |
