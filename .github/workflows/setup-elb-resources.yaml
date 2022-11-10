@@ -27,7 +27,7 @@ on:
 
       elb_target_group_port:
         description: Service ELB target group port
-        required: true
+        required: false
         type: string
         default: 8000
 
