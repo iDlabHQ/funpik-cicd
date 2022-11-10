@@ -49,7 +49,7 @@ jobs:
     uses: iDlabHQ/funpik-cicd/.github/workflows/setup-elb-resources.yaml@main
     with:
       environment: ${{ inputs.environment }}
-      elb_target_group_name: ${{ inputs.target_group_name }}
+      elb_target_group_name: ${{ inputs.elb_target_group_name }}
       elb_listener_port: ${{ inputs.elb_listener_port }}
 
   setup_ecs_service_task_definition:
