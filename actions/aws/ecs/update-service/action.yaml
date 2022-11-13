@@ -19,6 +19,6 @@ runs:
       shell: bash
       run: |
         aws ecs update-service \
-          --cluster {{ inputs.cluster_name }} \
-          --service {{ inputs.service_name }} \
+          --cluster ${{ inputs.cluster_name }} \
+          --service ${{ inputs.service_name }} \
           --force-new-deployment
