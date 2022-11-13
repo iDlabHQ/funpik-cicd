@@ -29,6 +29,9 @@ on:
         type: string
         default: 8000
 
+env:
+  AWS_ORG_ID: 778942390430
+
 jobs:
 
   configure_env:
@@ -67,7 +70,7 @@ jobs:
         id: prepare
         uses: iDlabHQ/funpik-cicd/actions/ecs/prepare-service@main
         with:
-          aws_org_id: 778942390430
+          aws_org_id: $AWS_ORG_ID
           service_name: ${{ inputs.service_name }}
           region: ${{ inputs.region }}
           listener_port: ${{ inputs.listener_port }}
@@ -90,7 +93,7 @@ jobs:
         id: build
         uses: iDlabHQ/funpik-cicd/actions/docker/build-and-push@main
         with:
-          aws_org_id: 778942390430
+          aws_org_id: $AWS_ORG_ID
           service_name: ${{ inputs.service_name }}
           region: ${{ inputs.region }}
           image_tag: ${{ needs.configure_env.outputs.image_tag }}
