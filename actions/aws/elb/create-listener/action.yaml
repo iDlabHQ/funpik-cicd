@@ -1,0 +1,56 @@
+name: ELB create listener
+
+inputs:
+  service_port:
+    description: Service port
+    required: true
+    type: string
+
+  elb_name:
+    description: ELB name
+    required: true
+    type: string
+
+  cert_name:
+    description: ELB certificate name
+    required: true
+    type: string
+
+  target_group_name:
+    description: ELB target group name
+    required: true
+    type: string
+
+
+runs:
+  using: composite
+  steps:
+    - name: Get elb arn
+      uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-arn-by-tag@main
+      with:
+        tag_values: ${{ inputs.elb_name }}
+
+    - name: Get certificate arn
+      uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-arn-by-tag@main
+      with:
+        tag_values: ${{ inputs.cert_name }}
+
+    - name: Get target-group ARNs
+      id: tg-arn
+      uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-arn-by-tag@main
+      with:
+        tag_values: ${{ inputs.target_group_name }}
+
+    - name: Create ELB listener
+      shell: bash
+      env:
+        ELB_ARN: ${{ steps.elb-arn.outputs.result }}
+        CERT_ARN: ${{ steps.cert-arn.outputs.result }}
+        TG_ARN: ${{ steps.tg-arn.outputs.result }}
+      run: |
+        aws elbv2 create-listener \
+          --load-balancer-arn ${{ env.ELB_ARN }} \
+          --protocol HTTPS \
+          --port ${{ inputs.service_port }} \
+          --certificates "CertificateArn=${{ env.CERT_ARN }}" \
+          --default-actions "Type=forward,TargetGroupArn=${{ env.TG_ARN }}"

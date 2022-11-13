@@ -49,6 +49,8 @@ env:
   ELB_TG_SUFFIX: -dev-tg
   SUBNET_NAMES: funpik-development-ap-northeast-2a-public-subnet,funpik-development-ap-northeast-2b-public-subnet
   VPC_NAME: funpik-development-vpc
+  ELB_NAME: funpik-development-external-lb
+  CERT_NAME: funpik-cert
 
 
 jobs:
@@ -85,6 +87,14 @@ jobs:
           target_group_name: ${{ inputs.service_name }}${{ env.ELB_TG_SUFFIX }}
           vpc_name: ${{ env.VPC_NAME }}
           target_group_port: ${{ env.MAIN_CONTAINER_PORT }}
+
+      - name: Create ELB listener
+        uses: iDlabHQ/funpik-cicd/actions/aws/elb/create-listener@main
+        with:
+          service_port: ${{ inputs.service_port }}
+          elb_name: ${{ env.ELB_NAME }}
+          cert_name: ${{ env.CERT_NAME }}
+          target_group_name: ${{ inputs.service_name }}${{ env.ELB_TG_SUFFIX }}
 
       - name: Register ECS task definition
         uses: iDlabHQ/funpik-cicd/actions/aws/ecs/register-task-definition@main
