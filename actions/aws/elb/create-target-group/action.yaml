@@ -34,7 +34,6 @@ runs:
         aws elbv2 create-target-group \
           --name ${{ inputs.target_group_name }} \
           --protocol HTTP \
-          --protocol-version \
           --protocol-version HTTP1 \
           --port ${{ inputs.target_group_port }} \
           --vpc-id ${{ env.VPCID }} \
