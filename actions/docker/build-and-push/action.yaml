@@ -54,9 +54,9 @@ runs:
     - name: Create repository if not exists
       run: |
         aws ecr describe-repositories \
-          --repository-names ${{ inputs.repo_name }}${{ env.SUFFIX }} || \
+          --repository-names ${{ inputs.service_name }}${{ env.SUFFIX }} || \
         aws ecr create-repository \
-          --repository-name ${{ inputs.repo_name }}${{ env.SUFFIX }}
+          --repository-name ${{ inputs.service_name }}${{ env.SUFFIX }}
       shell: bash
 
     - name: Build, tag, and push image to Amazon ECR
