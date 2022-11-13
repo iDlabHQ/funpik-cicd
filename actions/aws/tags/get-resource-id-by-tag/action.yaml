@@ -20,7 +20,7 @@ runs:
       run: |
         ARN=$(\
           aws resourcegroupstaggingapi get-resources \
-            --tag-filters "Key=${{ inputs.tag_key }},Values=${{ inputs.tag_values }}" | \
+            --tag-filters "Key=${{ inputs.tag_key }},Values=${{ inputs.tag_value }}" | \
           jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
         );
         ID=$(cut -d "/" -f2 <<< $ARN | xargs | sed -e's/ /,/g');
