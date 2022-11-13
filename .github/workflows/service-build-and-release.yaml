@@ -116,6 +116,7 @@ jobs:
 
     needs:
       - configure_environment
+      - prepare
 
     permissions:
       packages: write

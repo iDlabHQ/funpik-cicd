@@ -17,12 +17,12 @@ runs:
     - name: Create log group if not exists
       shell: bash
       run: |
-        aws logs create-log-group |
+        aws logs create-log-group \
           --log-group-name ${{ inputs.log_group_name }} || true;
 
     - name: Put log group retention policy
       shell: bash
       run: |
-        aws logs put-retention-policy |
+        aws logs put-retention-policy \
           --log-group-name ${{ inputs.log_group_name }}
           --retention-in-days ${{ inputs.log_group_retention_in_days }}
