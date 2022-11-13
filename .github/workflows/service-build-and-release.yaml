@@ -131,6 +131,9 @@ jobs:
           role-session-name: cicd
           aws-region: ${{ inputs.region }}
 
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Build & push
         uses: iDlabHQ/funpik-cicd/actions/docker/build-and-push@main
         env:
