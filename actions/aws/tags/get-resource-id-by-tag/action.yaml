@@ -1,0 +1,27 @@
+name: TAGS get resource id
+
+inputs:
+  tag_key:
+    description: AWS tag key
+    required: false
+    type: string
+    default: Name
+
+  tag_value:
+    description: AWS tag value
+    required: true
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - name: Get resouce by tag
+      shell: bash
+      run: |
+        ARN=$(\
+          aws resourcegroupstaggingapi get-resources \
+            --tag-filters "Key=${{ inputs.tag_key }},Values=${{ inputs.tag_values }}" | \
+          jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
+        );
+        ID=$(cut -d "/" -f2 <<< $ARN | xargs | sed -e's/ /,/g');
+        echo "id=$ID" >> $GITHUB_OUTPUT;

@@ -1,0 +1,44 @@
+name: ELB create target group
+
+inputs:
+
+  target_group_name:
+    description: ELB target group name
+    required: true
+    type: string
+
+  vpc_name:
+    description: VPC name
+    required: true
+    type: string
+
+  target_group_port:
+    description: Main container port
+    required: true
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - name: Get VPC id
+      id: vpc-id
+      uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-id-by-tag@main
+      with:
+        tag_value: ${{ inputs.vpc_name }}
+
+    - name: Create ELB target group
+      shell: bash
+      env:
+        VPCID: ${{ steps.vpc-id.outputs.id }}
+      run: |
+        aws elbv2 create-target-group \
+          --name ${{ inputs.target_group_name }} \
+          --protocol HTTP \
+          --protocol-version \
+          --protocol-version HTTP1 \
+          --port ${{ inputs.target_group_port }} \
+          --vpc-id ${{ env.VPCID }} \
+          --target-type ip \
+          --health-check-protocol HTTP \
+          --health-check-path "/v1/health" \
+          --tags Key=Name,Value=${{ inputs.target_group_name }}

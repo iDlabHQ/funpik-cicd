@@ -6,3 +6,90 @@ inputs:
     description: Service name
     required: true
     type: string
+
+  task_definition_name:
+    description: Task definition name
+    required: true
+    type: string
+
+  target_group_name:
+    description: ELB target group name
+    required: true
+    type: string
+
+  cluster_name:
+    description: ECR cluster name
+    required: true
+    type: string
+
+  service_count:
+    description: Service count
+    required: false
+    type: string
+    default: 1
+
+  sg_name:
+    description: Security group name
+    required: true
+    type: string
+
+  container_name:
+    description: Main container name
+    required: false
+    type: string
+    default: main
+
+  container_port:
+    description: Main container port
+    required: true
+    type: string
+
+  subnet_names:
+    description: Subnet names
+    required: true
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - name: Get service ARNs
+      id: svc-arn
+      uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-arn-by-tag@main
+      with:
+        tag_value: ${{ inputs.service_name }}
+
+    - name: Get target-group ARNs
+      id: tg-arn
+      uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-arn-by-tag@main
+      with:
+        tag_value: ${{ inputs.target_group_name }}
+
+    - name: Get security group id
+      id: sg-id
+      uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-id-by-tag@main
+      with:
+        tag_value: ${{ inputs.sg_name }}
+
+    - name: Get subnet ids
+      id: subnet-ids
+      uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-id-by-tag@main
+      with:
+        tag_value: ${{ inputs.subnet_names }}
+
+    - name: Create ECS service
+      if: ${{ steps.svc-arn.outputs.arn == '' }}
+      shell: bash
+      env:
+        TG_ARN: ${{ steps.tg-arn.outputs.arn }}
+        SG_ID: ${{ steps.sg-id.outputs.id }}
+        SUBNETS_IDS: ${{ steps.subnet-ids.outputs.id }}
+      run: |
+        aws ecs-create-service \
+          --cluster ${{ inputs.cluster_name }} \
+          --service-name ${{ inputs.service_name }} \
+          --task-definition ${{ inputs.task_definition_name }} \
+          --desired-count ${{ inputs.service_count }} \
+          --capacity-provider-strategy "capacityProvider=FARGATE,weight=1,base=0" \
+          --network-configuration "awsvpcConfiguration={securityGroups=[${{ env.SG_ID }}],subnets=[${{ env.SUBNETS_IDS }}],assignPublicIp=ENABLED}" \
+          --load-balancers "targetGroupArn=${{ env.TG_ARN }},containerName=${{ inputs.container_name }},containerPort=${{ inputs.container_port }}" \
+          --tags key=Name,value=${{ inputs.service_name }};
