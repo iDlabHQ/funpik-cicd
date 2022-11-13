@@ -1,0 +1,24 @@
+name: ECS update service
+
+inputs:
+
+  service_name:
+    description: Service name
+    required: true
+    type: string
+
+  cluster_name:
+    description: ECS cluster name
+    required: true
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - name: Force new deployment
+      shell: bash
+      run: |
+        aws ecs update-service \
+          --cluster {{ inputs.cluster_name }} \
+          --service {{ inputs.service_name }} \
+          --force-new-deployment

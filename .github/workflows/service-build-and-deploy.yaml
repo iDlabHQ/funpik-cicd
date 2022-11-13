@@ -38,19 +38,21 @@ on:
 
 env:
   AWS_ORG_ID: 778942390430
+  VPC_NAME: funpik-development-vpc
+  SUBNET_NAMES: funpik-development-ap-northeast-2a-public-subnet,funpik-development-ap-northeast-2b-public-subnet
+  SECURITY_GROUP_NAME: funpik-ecs-task-sg
+  ELB_NAME: funpik-development-external-lb
+  ELB_TARGET_GROUP_CONTAINER_PORT: 8000
+  CERT_NAME: funpik-cert
+  CLUSTER_NAME: funpik-development-cluster
+  # 
   ECR_IMAGE_TAG: dev
+  CLOUD_WATCH_LOG_GROUP_RETENTION: 3
+  # 
   ECS_SERVICE_SUFFIX: -dev
   ECS_TASK_DEF_SUFFIX: -development
+  ELB_TARGET_GROUP_SUFFIX: -dev-tg
   CLOUD_WATCH_LOG_GROUP_SUFFIX: /development
-  CLOUD_WATCH_LOG_GROUP_RETENTION: 3
-  MAIN_CONTAINER_PORT: 8000
-  MAIN_SECURITY_GROUP_NAME: funpik-ecs-task-sg
-  CLUSTER_NAME: funpik-development-cluster
-  ELB_TG_SUFFIX: -dev-tg
-  SUBNET_NAMES: funpik-development-ap-northeast-2a-public-subnet,funpik-development-ap-northeast-2b-public-subnet
-  VPC_NAME: funpik-development-vpc
-  ELB_NAME: funpik-development-external-lb
-  CERT_NAME: funpik-cert
 
 
 jobs:
@@ -84,9 +86,9 @@ jobs:
       - name: Create ELB target group 
         uses: iDlabHQ/funpik-cicd/actions/aws/elb/create-target-group@main
         with:
-          target_group_name: ${{ inputs.service_name }}${{ env.ELB_TG_SUFFIX }}
+          target_group_name: ${{ inputs.service_name }}${{ env.ELB_TARGET_GROUP_SUFFIX }}
           vpc_name: ${{ env.VPC_NAME }}
-          target_group_port: ${{ env.MAIN_CONTAINER_PORT }}
+          target_group_port: ${{ env.ELB_TARGET_GROUP_CONTAINER_PORT }}
 
       - name: Create ELB listener
         uses: iDlabHQ/funpik-cicd/actions/aws/elb/create-listener@main
@@ -94,7 +96,7 @@ jobs:
           service_port: ${{ inputs.service_port }}
           elb_name: ${{ env.ELB_NAME }}
           cert_name: ${{ env.CERT_NAME }}
-          target_group_name: ${{ inputs.service_name }}${{ env.ELB_TG_SUFFIX }}
+          target_group_name: ${{ inputs.service_name }}${{ env.ELB_TARGET_GROUP_SUFFIX }}
 
       - name: Register ECS task definition
         uses: iDlabHQ/funpik-cicd/actions/aws/ecs/register-task-definition@main
@@ -108,18 +110,18 @@ jobs:
           image_tag: ${{ env.ECR_IMAGE_TAG }}
           registery_name: ${{ env.AWS_ORG_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com
           log_group_name: /ecs/${{ inputs.service_name }}${{ env.CLOUD_WATCH_LOG_GROUP_SUFFIX }}
-          container_port: ${{ env.MAIN_CONTAINER_PORT }}
+          container_port: ${{ env.ELB_TARGET_GROUP_CONTAINER_PORT }}
 
       - name: Create ECS service
         uses: iDlabHQ/funpik-cicd/actions/aws/ecs/create-service@main
         with:
           service_name: ${{ inputs.service_name }}
           task_definition_name: ${{ inputs.service_name }}${{ env.ECS_TASK_DEF_SUFFIX }}
-          target_group_name: ${{ inputs.service_name }}${{ env.ELB_TG_SUFFIX }}
+          target_group_name: ${{ inputs.service_name }}${{ env.ELB_TARGET_GROUP_SUFFIX }}
           cluster_name: ${{ env.CLUSTER_NAME }}
           service_count: ${{ inputs.service_count }}
-          sg_name: ${{ env.MAIN_SECURITY_GROUP_NAME }}
-          container_port: ${{ env.MAIN_CONTAINER_PORT }}
+          sg_name: ${{ env.SECURITY_GROUP_NAME }}
+          container_port: ${{ env.ELB_TARGET_GROUP_CONTAINER_PORT }}
           subnet_names: ${{ env.SUBNET_NAMES }}
 
   build:
@@ -150,3 +152,28 @@ jobs:
           repository_name: ${{ inputs.service_name }}
           image_tag: ${{ env.ECR_IMAGE_TAG }}
           cicd_git_token: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    needs:
+      - build
+
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ORG_ID }}:role/github-actions-cicd-role
+          role-session-name: cicd
+          aws-region: ${{ inputs.region }}
+
+      - name: Deploy
+        uses: iDlabHQ/funpik-cicd/actions/aws/ecs/update-service@main
+        with:
+          service_name: ${{ inputs.service_name }}
+          cluster_name: ${{ env.CLUSTER_NAME }}
