@@ -29,4 +29,5 @@ runs:
             --tag-filters "Key=${{ inputs.tag_key }},Values=${{ inputs.tag_values }}" | \
           jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
         );
+        ARN=$(echo $ARN | xargs | sed -e's/ /,/g');
         echo "result=$ARN" >> $GITHUB_OUTPUT;
