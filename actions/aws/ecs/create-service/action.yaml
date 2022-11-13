@@ -84,7 +84,7 @@ runs:
         SG_ID: ${{ steps.sg-id.outputs.result }}
         SUBNETS_IDS: ${{ steps.subnet-ids.outputs.result }}
       run: |
-        aws ecs-create-service \
+        aws ecs create-service \
           --cluster ${{ inputs.cluster_name }} \
           --service-name ${{ inputs.service_name }} \
           --task-definition ${{ inputs.task_definition_name }} \
