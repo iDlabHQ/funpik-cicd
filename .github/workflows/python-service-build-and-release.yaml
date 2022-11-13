@@ -32,9 +32,8 @@ on:
     secrets:
       AWS_ORG_ID:
         description: AWS Organization Id
-        required: false
+        required: true
         type: string
-        default: ${{ secrets.AWS_ORG_ID }}
 
 jobs:
 
