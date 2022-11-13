@@ -2,7 +2,7 @@ name: Docker build and push
 
 inputs:
   service_name:
-    description: service name
+    description: Service name
     required: true
     type: string
 
@@ -10,16 +10,16 @@ inputs:
     description: Image tag
     required: false
     type: string
+    default: dev
 
   region:
     description: AWS region
-    required: false
+    required: true
     type: string
-    default: ap-northeast-2
 
   git_token:
     required: false
-    description: 'Git access token'
+    description: Git access token
 
 runs:
   using: composite
@@ -33,7 +33,7 @@ runs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        role-to-assume: arn:aws:iam::778942390430:role/github-actions-cicd-role
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ORG_ID }}:role/github-actions-cicd-role
         role-session-name: cicd
         aws-region: ${{ inputs.region }}
 
@@ -52,7 +52,7 @@ runs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ inputs.name }}
-        IMAGE_TAG: ${{ inputs.image_tag || 'latest' }}
+        IMAGE_TAG: ${{ inputs.image_tag }}
         GIT_TOKEN: ${{ inputs.git_token }}
       run: |
         if [[ $GIT_TOKEN ]]
