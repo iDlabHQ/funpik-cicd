@@ -78,7 +78,6 @@ jobs:
           image_tag: ${{ env.ECR_IMAGE_TAG }}
           registery_name: ${{ env.AWS_ORG_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com
           log_group_name: /ecs/${{ inputs.service_name }}${{ env.CLOUD_WATCH_LOG_GROUP_SUFFIX }}
-          region: ${{ inputs.region }}
           container_port: ${{ env.MAIN_CONTAINER_PORT }}
 
   build:

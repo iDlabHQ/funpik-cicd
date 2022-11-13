@@ -50,11 +50,6 @@ inputs:
     required: true
     type: string
 
-  region:
-    description: log group region
-    required: true
-    type: string
-
 
 runs:
   using: composite
@@ -68,7 +63,7 @@ runs:
           --execution-role-arn ${{ inputs.task_execution_role_arn }} \
           --network-mode awsvpc \
           --runtime-platform cpuArchitecture=ARM64,operatingSystemFamily=LINUX \
-          --cpu ${{ inputs.cpu }} \
-          --memory ${{ inputs.memory }} \
-          --requires-compatibilities FARGATE EC2 EXTERNAL \
-          --container-definitions "[{\"name\":\"main\",\"image\":\"${{ inputs.registery_name }}\/${{ inputs.repository_name }}:${{ inputs.image_tag }}\",\"portMappings\":[{\"containerPort\": ${{ inputs.container_port }}}],\"logConfiguration\": {\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"${{ inputs.log_group_name }}\",\"awslogs-region\": \"${{ inputs.region }}\",\"awslogs-stream-prefix\":\"ecs\"}}}]";
+          --cpu "${{ inputs.cpu }}" \
+          --memory "${{ inputs.memory }}" \
+          --requires-compatibilities "FARGATE EC2 EXTERNAL" \
+          --container-definitions "[{\"name\":\"main\",\"image\":\"${{ inputs.registery_name }}\/${{ inputs.repository_name }}:${{ inputs.image_tag }}\",\"portMappings\":[{\"containerPort\": ${{ inputs.container_port }}}],\"logConfiguration\": {\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"${{ inputs.log_group_name }}\",\"awslogs-region\": \"${{ env.AWS_REGION }}\",\"awslogs-stream-prefix\":\"ecs\"}}}]";
