@@ -29,15 +29,14 @@ on:
         type: string
         default: 8000
     
-      aws_org_id:
+    secrets:
+      AWS_ORG_ID:
         description: AWS Organization Id
         required: true
-        type: string
 
-      cicd_git_token:
+      CICD_GIT_TOKEN:
         description: Github CICD git token
         required: true
-        type: string
 
 jobs:
 
