@@ -60,6 +60,7 @@ runs:
   using: composite
   steps:
     - name: Register task definition
+      shell: bash
       run: |
         aws ecs register-task-definition \
           --family ${{ inputs.task_definition_name }} \
