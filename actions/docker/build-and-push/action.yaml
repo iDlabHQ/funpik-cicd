@@ -41,6 +41,6 @@ runs:
         then
           BUILD_ARG="--build-arg GIT_TOKEN=$GIT_TOKEN"
         fi;
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $BUILD_ARG;
+        docker build . -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $BUILD_ARG;
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG;
         echo "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
