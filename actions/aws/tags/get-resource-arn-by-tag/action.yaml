@@ -12,6 +12,11 @@ inputs:
     required: true
     type: string
 
+outputs:
+  result: 
+    description: resource ARN
+    value: ${{ steps.main.outputs.result }}
+
 runs:
   using: composite
   steps:
