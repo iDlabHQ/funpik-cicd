@@ -29,14 +29,15 @@ on:
         type: string
         default: 8000
     
-    secrets:
-      AWS_ORG_ID:
+      aws_org_id:
         description: AWS Organization Id
         required: true
+        type: string
 
-      CICD_GIT_TOKEN:
+      cicd_git_token:
         description: Github CICD git token
         required: true
+        type: string
 
 jobs:
 
@@ -103,4 +104,4 @@ jobs:
           service_name: ${{ inputs.service_name }}
           region: ${{ inputs.region }}
           image_tag: ${{ needs.configure_env.outputs.image_tag }}
-          git_token: ${{ secrets.CICD_GIT_TOKEN }}
+          cicd_git_token: ${{ secrets.CICD_GIT_TOKEN }}
