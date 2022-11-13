@@ -29,6 +29,11 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: test
+      run: |
+        echo ${{ inputs.aws_org_id }}
+      shell: bash
+    
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
 
