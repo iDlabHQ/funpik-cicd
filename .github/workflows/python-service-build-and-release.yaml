@@ -33,7 +33,6 @@ on:
       AWS_ORG_ID:
         description: AWS Organization Id
         required: true
-        type: string
 
 jobs:
 
