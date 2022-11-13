@@ -77,12 +77,12 @@ runs:
         tag_values: ${{ inputs.subnet_names }}
 
     - name: Create ECS service
-      if: ${{ steps.svc-arn.outputs.arn == '' }}
+      if: ${{ steps.svc-arn.outputs.result == '' }}
       shell: bash
       env:
-        TG_ARN: ${{ steps.tg-arn.outputs.arn }}
-        SG_ID: ${{ steps.sg-id.outputs.id }}
-        SUBNETS_IDS: ${{ steps.subnet-ids.outputs.id }}
+        TG_ARN: ${{ steps.tg-arn.outputs.result }}
+        SG_ID: ${{ steps.sg-id.outputs.result }}
+        SUBNETS_IDS: ${{ steps.subnet-ids.outputs.result }}
       run: |
         aws ecs-create-service \
           --cluster ${{ inputs.cluster_name }} \

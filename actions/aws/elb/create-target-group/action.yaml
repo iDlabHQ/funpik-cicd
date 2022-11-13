@@ -29,7 +29,7 @@ runs:
     - name: Create ELB target group
       shell: bash
       env:
-        VPCID: ${{ steps.vpc-id.outputs.id }}
+        VPCID: ${{ steps.vpc-id.outputs.result }}
       run: |
         aws elbv2 create-target-group \
           --name ${{ inputs.target_group_name }} \

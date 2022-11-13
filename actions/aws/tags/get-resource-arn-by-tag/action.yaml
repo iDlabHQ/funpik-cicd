@@ -14,8 +14,11 @@ inputs:
 
 runs:
   using: composite
+  outputs:
+    result: ${{ steps.main.outputs.result }}
   steps:
     - name: Get resouce by tag
+      id: main
       shell: bash
       run: |
         ARN=$(\
@@ -23,4 +26,4 @@ runs:
             --tag-filters "Key=${{ inputs.tag_key }},Values=${{ inputs.tag_values }}" | \
           jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
         );
-        echo "arn=$ARN" >> $GITHUB_OUTPUT;
+        echo "result=$ARN" >> $GITHUB_OUTPUT;
