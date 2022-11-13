@@ -29,10 +29,10 @@ on:
         type: string
         default: 8000
     
-      aws_org_id:
+    secrets:
+      AWS_ORG_ID:
         description: AWS Organization Id
         required: true
-        type: string
 
 jobs:
 
@@ -72,7 +72,6 @@ jobs:
         id: prepare
         uses: iDlabHQ/funpik-cicd/actions/ecs/prepare-service@main
         with:
-          aws_org_id: ${{ inputs.aws_org_id }}
           service_name: ${{ inputs.service_name }}
           region: ${{ inputs.region }}
           listener_port: ${{ inputs.listener_port }}
@@ -95,7 +94,6 @@ jobs:
         id: build
         uses: iDlabHQ/funpik-cicd/actions/docker/build-and-push@main
         with:
-          aws_org_id: ${{ inputs.aws_org_id }}
           service_name: ${{ inputs.service_name }}
           region: ${{ inputs.region }}
           image_tag: ${{ needs.configure_env.outputs.image_tag }}
