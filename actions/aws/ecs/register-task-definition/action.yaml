@@ -1,0 +1,73 @@
+name: ECS register task definition
+
+inputs:
+
+  task_definition_name:
+    description: ECS task definition name
+    required: true
+    type: string
+
+  task_role_arn:
+    description: Task role arn value
+    required: true
+    type: string
+
+  task_execution_role_arn:
+    description: Task execution role arn value
+    required: true
+    type: string
+
+  container_port:
+    description: Main container port
+
+  memory:
+    description: memory limit
+    required: true
+    type: string
+
+  cpu:
+    description: cpu limit
+    required: true
+    type: string
+
+  repository_name:
+    description: Repository name
+    required: true
+    type: string
+
+  image_tag:
+    description: Image tag
+    required: true
+    type: string
+
+  registery_name:
+    description: Registery name
+    required: true
+    type: string
+
+  log_group_name:
+    description: Log group name
+    required: true
+    type: string
+
+  region:
+    description: log group region
+    required: true
+    type: string
+
+
+runs:
+  using: composite
+  steps:
+    - name: Register task definition
+      run: |
+        aws ecs register-task-definition \
+          --family ${{ inputs.task_definition_name }} \
+          --task-role-arn ${{ inputs.task_role_arn }} \
+          --execution-role-arn ${{ inputs.task_execution_role_arn }} \
+          --network-mode awsvpc \
+          --runtime-platform cpuArchitecture=ARM64,operatingSystemFamily=LINUX \
+          --cpu ${{ inputs.cpu }} \
+          --memory ${{ inputs.memory }} \
+          --requires-compatibilities FARGATE EC2 EXTERNAL \
+          --container-definitions "[{\"name\":\"main\",\"image\":\"${{ inputs.registery_name }}\/${{ inputs.repository_name }}:${{ inputs.image_tag }}\",\"portMappings\":[{\"containerPort\": ${{ inputs.container_port }}}],\"logConfiguration\": {\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"${{ inputs.log_group_name }}\",\"awslogs-region\": \"${{ inputs.region }}\",\"awslogs-stream-prefix\":\"ecs\"}}}]";

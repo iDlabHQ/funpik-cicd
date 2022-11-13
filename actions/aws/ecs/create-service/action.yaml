@@ -1,0 +1,8 @@
+name: ECS create service
+
+inputs:
+  
+  service_name:
+    description: Service name
+    required: true
+    type: string

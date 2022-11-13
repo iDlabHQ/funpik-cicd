@@ -1,0 +1,19 @@
+name: Get version number
+
+runs:
+  using: composite
+  steps:
+    - name: Set version environment
+      shell: bash
+      run: |
+        echo "RELEASE_VERSION=$(echo ${GITHUB_REF#refs/*/}" | sed 's/[^0-9^\.]*//g')" >> $GITHUB_ENV
+
+    - name: Check value exists - set latest for default
+      shell: bash
+      run: |
+        echo "RELEASE_VERSION=${RELEASE_VERSION:-latest}" >> $GITHUB_ENV
+
+    - name: Print version
+      shell: bash
+      run: |
+        echo version $RELEASE_VERSION
