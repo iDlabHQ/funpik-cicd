@@ -28,15 +28,6 @@ on:
         required: false
         type: string
         default: 8000
-    
-    secrets:
-      AWS_ORG_ID:
-        description: AWS Organization Id
-        required: true
-
-      CICD_GIT_TOKEN:
-        description: Github CICD git token
-        required: true
 
 jobs:
 
@@ -76,7 +67,7 @@ jobs:
         id: prepare
         uses: iDlabHQ/funpik-cicd/actions/ecs/prepare-service@main
         with:
-          aws_org_id: ${{ secrets.AWS_ORG_ID }}
+          aws_org_id: 778942390430
           service_name: ${{ inputs.service_name }}
           region: ${{ inputs.region }}
           listener_port: ${{ inputs.listener_port }}
@@ -99,8 +90,8 @@ jobs:
         id: build
         uses: iDlabHQ/funpik-cicd/actions/docker/build-and-push@main
         with:
-          aws_org_id: ${{ secrets.AWS_ORG_ID }}
+          aws_org_id: 778942390430
           service_name: ${{ inputs.service_name }}
           region: ${{ inputs.region }}
           image_tag: ${{ needs.configure_env.outputs.image_tag }}
-          cicd_git_token: ${{ secrets.CICD_GIT_TOKEN }}
+          cicd_git_token: ${{ secrets.GITHUB_TOKEN }}
