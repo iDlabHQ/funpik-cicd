@@ -37,10 +37,9 @@ runs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        role-to-assume: arn:aws:iam::${{ secrets.aws_org_id }}:role/github-actions-cicd-role
+        role-to-assume: arn:aws:iam::${{ inputs.aws_org_id }}:role/github-actions-cicd-role
         role-session-name: cicd
         aws-region: ${{ inputs.region }}
-      shell: bash
 
     - name: Echo
       run: |

@@ -52,6 +52,7 @@ runs:
           --repository-names ${{ inputs.repo_name }}${{ env.SUFFIX }} || \
         aws ecr create-repository \
           --repository-name ${{ inputs.repo_name }}${{ env.SUFFIX }}
+      shell: bash
 
     - name: Build, tag, and push image to Amazon ECR
       env:
