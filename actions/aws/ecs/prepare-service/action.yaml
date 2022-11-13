@@ -2,7 +2,7 @@ name: ECS prepare service
 
 inputs:
   aws_org_id:
-    description: AWS Organization Id
+    description: AWS organization Id
     required: true
     type: string
 

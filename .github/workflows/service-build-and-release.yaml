@@ -1,0 +1,140 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Environment
+        required: false
+        type: string
+        default: development
+
+      region:
+        description: AWS region
+        required: false
+        type: string
+        default: ap-northeast-2
+
+      service_name:
+        description: service name
+        required: true
+        type: string
+
+      listener_port:
+        description: Service elb listener port
+        required: true
+        type: string
+
+      target_group_port:
+        description: Service ELB target group port
+        required: false
+        type: string
+        default: 8000
+
+env:
+  AWS_ORG_ID: 778942390430
+
+jobs:
+  configure_environment:
+    runs-on: ubuntu-latest
+     
+    outputs:
+      ECR_IMAGE_TAG: ${{ steps.configure_dev.outputs.ECR_IMAGE_TAG || steps.configure_prod.outputs.ECR_IMAGE_TAG }}
+      ECS_SERVICE_SUFFIX: ${{ steps.configure_dev.outputs.ECS_SERVICE_SUFFIX || steps.configure_prod.outputs.ECS_SERVICE_SUFFIX }}
+      ECS_TASK_DEF_SUFFIX: ${{ steps.configure_dev.outputs.ECS_TASK_DEF_SUFFIX || steps.configure_prod.outputs.ECS_TASK_DEF_SUFFIX }}
+      CLOUD_WATCH_LOG_GROUP_SUFFIX: ${{ steps.configure_dev.outputs.CLOUD_WATCH_LOG_GROUP_SUFFIX || steps.configure_prod.outputs.CLOUD_WATCH_LOG_GROUP_SUFFIX }}
+      CLOUD_WATCH_LOG_GROUP_RETENTION: ${{ steps.configure_dev.outputs.CLOUD_WATCH_LOG_GROUP_RETENTION || steps.configure_prod.outputs.CLOUD_WATCH_LOG_GROUP_RETENTION }}
+    
+    steps:
+      - name: Configure development
+        id: configure_dev
+        if: ${{ inputs.environment == 'development' }}
+        env:
+          ECR_IMAGE_TAG: dev
+          ECS_SERVICE_SUFFIX: -dev
+          ECS_TASK_DEF_SUFFIX: -dev
+          CLOUD_WATCH_LOG_GROUP_SUFFIX: /development
+          CLOUD_WATCH_LOG_GROUP_RETENTION: 3
+        run: |
+          echo "ECR_IMAGE_TAG=$ECR_IMAGE_TAG" >> $GITHUB_OUTPUT;
+          echo "ECS_SERVICE_SUFFIX=$ECS_SERVICE_SUFFIX" >> $GITHUB_OUTPUT;
+          echo "ECS_TASK_DEF_SUFFIX=$ECS_TASK_DEF_SUFFIX" >> $GITHUB_OUTPUT;
+          echo "CLOUD_WATCH_LOG_GROUP_SUFFIX=$CLOUD_WATCH_LOG_GROUP_SUFFIX" >> $GITHUB_OUTPUT;
+          echo "CLOUD_WATCH_LOG_GROUP_RETENTION=$CLOUD_WATCH_LOG_GROUP_RETENTION" >> $GITHUB_OUTPUT
+
+      - name: Configure production
+        id: configure_prod
+        if: ${{ inputs.environment == 'production' }}
+        env:
+          ECR_IMAGE_TAG: latest
+          ECS_SERVICE_SUFFIX: -prod
+          ECS_TASK_DEF_SUFFIX: -prod
+          CLOUD_WATCH_LOG_GROUP_SUFFIX: /production
+          CLOUD_WATCH_LOG_GROUP_RETENTION: 0
+        run: |
+          echo "ECR_IMAGE_TAG=$ECR_IMAGE_TAG" >> $GITHUB_OUTPUT;
+          echo "ECS_SERVICE_SUFFIX=$ECS_SERVICE_SUFFIX" >> $GITHUB_OUTPUT;
+          echo "ECS_TASK_DEF_SUFFIX=$ECS_TASK_DEF_SUFFIX" >> $GITHUB_OUTPUT;
+          echo "CLOUD_WATCH_LOG_GROUP_SUFFIX=$CLOUD_WATCH_LOG_GROUP_SUFFIX" >> $GITHUB_OUTPUT;
+          echo "CLOUD_WATCH_LOG_GROUP_RETENTION=$CLOUD_WATCH_LOG_GROUP_RETENTION" >> $GITHUB_OUTPUT
+
+  prepare:
+    runs-on: ubuntu-latest
+
+    needs:
+      - configure_environment
+
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ORG_ID }}:role/github-actions-cicd-role
+          role-session-name: cicd
+          aws-region: ${{ inputs.region }}
+
+      - name: Create ECR repository
+        uses: iDlabHQ/funpik-cicd/actions/aws/ecr/create-repository@main
+        with:
+          repository_name: ${{ inputs.service_name }}
+
+      - name: Create CloudWatch log group
+        uses: iDlabHQ/funpik-cicd/actions/aws/cloudwatch/create-log-group@main
+        env:
+          CLOUD_WATCH_LOG_GROUP_SUFFIX: ${{ needs.configure_environment.outputs.CLOUD_WATCH_LOG_GROUP_SUFFIX }}
+          CLOUD_WATCH_LOG_GROUP_RETENTION: ${{ needs.configure_environment.outputs.CLOUD_WATCH_LOG_GROUP_RETENTION }}
+        with:
+          log_group_name: /ecs/${{ inputs.service_name }}${{ env.CLOUD_WATCH_LOG_GROUP_SUFFIX }}
+          log_group_retention_in_days: ${{ env.CLOUD_WATCH_LOG_GROUP_RETENTION }}
+
+      # TODO more steps
+
+  build:
+    runs-on: ubuntu-latest
+
+    needs:
+      - configure_environment
+
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ORG_ID }}:role/github-actions-cicd-role
+          role-session-name: cicd
+          aws-region: ${{ inputs.region }}
+
+      - name: Build & push
+        uses: iDlabHQ/funpik-cicd/actions/docker/build-and-push@main
+        env:
+          ECR_IMAGE_TAG: ${{ needs.configure_environment.outputs.ECR_IMAGE_TAG }}
+        with:
+          repository_name: ${{ inputs.service_name }}
+          image_tag: ${{ env.ECR_IMAGE_TAG }}
+          cicd_git_token: ${{ secrets.GITHUB_TOKEN }}
