@@ -43,7 +43,7 @@ env:
   SECURITY_GROUP_NAME: funpik-ecs-task-sg
   ELB_NAME: funpik-development-external-lb
   ELB_TARGET_GROUP_CONTAINER_PORT: 8000
-  CERT_NAME: funpik-cert
+  CERT_NAME: funpik-development-api-cert
   CLUSTER_NAME: funpik-development-cluster
   # 
   ECR_IMAGE_TAG: dev
