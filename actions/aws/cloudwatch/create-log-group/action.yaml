@@ -24,5 +24,5 @@ runs:
       shell: bash
       run: |
         aws logs put-retention-policy \
-          --log-group-name ${{ inputs.log_group_name }}
+          --log-group-name ${{ inputs.log_group_name }} \
           --retention-in-days ${{ inputs.log_group_retention_in_days }}
