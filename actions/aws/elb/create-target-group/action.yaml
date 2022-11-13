@@ -24,7 +24,7 @@ runs:
       id: vpc-id
       uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-id-by-tag@main
       with:
-        tag_value: ${{ inputs.vpc_name }}
+        tag_values: ${{ inputs.vpc_name }}
 
     - name: Create ELB target group
       shell: bash

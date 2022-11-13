@@ -56,25 +56,25 @@ runs:
       id: svc-arn
       uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-arn-by-tag@main
       with:
-        tag_value: ${{ inputs.service_name }}
+        tag_values: ${{ inputs.service_name }}
 
     - name: Get target-group ARNs
       id: tg-arn
       uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-arn-by-tag@main
       with:
-        tag_value: ${{ inputs.target_group_name }}
+        tag_values: ${{ inputs.target_group_name }}
 
     - name: Get security group id
       id: sg-id
       uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-id-by-tag@main
       with:
-        tag_value: ${{ inputs.sg_name }}
+        tag_values: ${{ inputs.sg_name }}
 
     - name: Get subnet ids
       id: subnet-ids
       uses: iDlabHQ/funpik-cicd/actions/aws/tags/get-resource-id-by-tag@main
       with:
-        tag_value: ${{ inputs.subnet_names }}
+        tag_values: ${{ inputs.subnet_names }}
 
     - name: Create ECS service
       if: ${{ steps.svc-arn.outputs.arn == '' }}

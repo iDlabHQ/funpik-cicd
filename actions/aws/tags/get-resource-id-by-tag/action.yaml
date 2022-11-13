@@ -7,7 +7,7 @@ inputs:
     type: string
     default: Name
 
-  tag_value:
+  tag_values:
     description: AWS tag value
     required: true
     type: string
@@ -20,7 +20,7 @@ runs:
       run: |
         ARN=$(\
           aws resourcegroupstaggingapi get-resources \
-            --tag-filters "Key=${{ inputs.tag_key }},Values=${{ inputs.tag_value }}" | \
+            --tag-filters "Key=${{ inputs.tag_key }},Values=${{ inputs.tag_values }}" | \
           jq -r '.ResourceTagMappingList | .[] | .ResourceARN' \
         );
         ID=$(cut -d "/" -f2 <<< $ARN | xargs | sed -e's/ /,/g');
