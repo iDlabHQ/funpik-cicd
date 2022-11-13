@@ -28,6 +28,13 @@ on:
         required: false
         type: string
         default: 8000
+    
+    secrets:
+      AWS_ORG_ID:
+        description: AWS Organization Id
+        required: false
+        type: string
+        default: ${{ secrets.AWS_ORG_ID }}
 
 jobs:
 
