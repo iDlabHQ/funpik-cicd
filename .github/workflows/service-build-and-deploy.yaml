@@ -57,7 +57,7 @@ env:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     permissions:
       packages: write
@@ -125,7 +125,7 @@ jobs:
           subnet_names: ${{ env.SUBNET_NAMES }}
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     needs:
       - prepare
@@ -154,7 +154,7 @@ jobs:
           cicd_git_token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     needs:
       - build
