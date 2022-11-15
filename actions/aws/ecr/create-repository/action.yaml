@@ -15,4 +15,6 @@ runs:
         aws ecr describe-repositories \
           --repository-names ${{ inputs.repository_name }} || \
         aws ecr create-repository \
-          --repository-name ${{ inputs.repository_name }}
+          --repository-name ${{ inputs.repository_name }} \
+          --image-scanning-configuration scanOnPush=boolean \
+          --image-tag-mutability MUTABLE

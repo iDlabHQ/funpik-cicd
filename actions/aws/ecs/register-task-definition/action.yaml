@@ -23,6 +23,14 @@ inputs:
     type: string
     default: main
 
+  cpu_architecture:
+    description: Machine architecture
+    required: false
+    type: string
+    default: ARM64
+    # x86_64
+    # ARM64
+
   container_port:
     description: Main container port
     required: true
@@ -70,7 +78,7 @@ runs:
           --task-role-arn ${{ inputs.task_role_arn }} \
           --execution-role-arn ${{ inputs.task_execution_role_arn }} \
           --network-mode awsvpc \
-          --runtime-platform cpuArchitecture=ARM64,operatingSystemFamily=LINUX \
+          --runtime-platform cpuArchitecture=${{ inputs.cpu_architecture }},operatingSystemFamily=LINUX \
           --cpu "${{ inputs.cpu }}" \
           --memory "${{ inputs.memory }}" \
           --requires-compatibilities "FARGATE" "EC2" \
