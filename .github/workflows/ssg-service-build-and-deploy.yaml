@@ -46,6 +46,11 @@ jobs:
     needs:
       - build
 
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+
     steps:
 
       - uses: actions/download-artifact@v3
