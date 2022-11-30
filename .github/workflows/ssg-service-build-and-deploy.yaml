@@ -7,30 +7,74 @@ on:
         type: string
         default: ap-northeast-2
 
-      service_name:
-        description: Service name
+      bucket_name:
+        description: Bucket name
         required: true
         type: string
 
 env:
   AWS_ORG_ID: 778942390430
 
-
 jobs:
-  prepare:
-    runs-on: self-hosted
-
-    permissions:
-      packages: write
-      contents: read
-      id-token: write
+  build_and_deploy:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ORG_ID }}:role/github-actions-cicd-role
-          role-session-name: cicd
-          aws-region: ${{ inputs.region }}
+      - name: Checkout
+        uses: actions/checkout@v3
 
+      - name: Detect package manager
+        id: detect-package-manager
+        run: |
+          if [ -f "${{ github.workspace }}/yarn.lock" ]; then
+            echo "::set-output name=manager::yarn"
+            echo "::set-output name=command::install"
+            echo "::set-output name=runner::yarn"
+            exit 0
+          elif [ -f "${{ github.workspace }}/package.json" ]; then
+            echo "::set-output name=manager::npm"
+            echo "::set-output name=command::ci"
+            echo "::set-output name=runner::npx --no-install"
+            exit 0
+          else
+            echo "Unable to determine packager manager"
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: ${{ steps.detect-package-manager.outputs.manager }}
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            .next/cache
+          # Generate a new cache whenever packages or source files change.
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          # If source files changed but packages didn't, rebuild from a prior cache.
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       
+      - name: Install dependencies
+        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+
+      - name: Build with Next.js
+        run: ${{ steps.detect-package-manager.outputs.runner }} next build
+
+      - name: Static HTML export with Next.js
+        run: ${{ steps.detect-package-manager.outputs.runner }} next export
+
+      # fix and use configure AWS credentials 
+      - name: Deploy
+        uses: reggionick/s3-deploy@v3
+        with:
+          folder: ./out
+          bucket: ${{ inputs.bucket_name }}
+          bucket-region: ${{ inputs.region }}
+          invalidation: /
+          delete-removed: true
+          no-cache: true
+          filesToInclude: ".*/*,*/*,**"
