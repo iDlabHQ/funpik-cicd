@@ -34,8 +34,7 @@ jobs:
 
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
       - name: Setup NodeJS
         uses: actions/setup-node@v1
@@ -50,7 +49,28 @@ jobs:
           npm run build
           npm run export
 
+      - uses: actions/upload-artifact
+        with:
+          name: project-artifact
+          path: ./out
 
+  deploy:
+    runs-on: ubuntu-latest
 
-  # deploy:
-  #   runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/download-artifact@master
+        with:
+          name: project-artifact
+          path: ./out
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ORG_ID }}:role/github-actions-cicd-role
+          role-session-name: cicd
+          aws-region: ${{ inputs.region }}
+
+      - name: Upload to S3
+        run: |
+          aws s3 sync ./out s3://{{ inputs.bucket_name }}
