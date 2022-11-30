@@ -16,19 +16,6 @@ env:
   AWS_ORG_ID: 778942390430
 
 jobs:
-  # prepare:
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-
-  #     - name: Configure AWS Credentials
-  #       uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         role-to-assume: arn:aws:iam::${{ env.AWS_ORG_ID }}:role/github-actions-cicd-role
-  #         role-session-name: cicd
-  #         aws-region: ${{ inputs.region }}
-
-  
   build:
     runs-on: ubuntu-latest
 
@@ -75,4 +62,4 @@ jobs:
 
       - name: Upload to S3
         run: |
-          aws s3 sync ./out s3://{{ inputs.bucket_name }}
+          aws s3 sync ./out/. s3://{{ inputs.bucket_name }} --cache-control max-age=0
