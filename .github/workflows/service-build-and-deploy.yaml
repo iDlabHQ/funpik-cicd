@@ -125,7 +125,7 @@ jobs:
           subnet_names: ${{ env.SUBNET_NAMES }}
 
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     needs:
       - prepare
@@ -154,7 +154,7 @@ jobs:
           cicd_git_token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     needs:
       - build
